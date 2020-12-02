@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <!-- aframe itself -->
+    <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
+    <!-- physics and other extras -->
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.13.1/dist/aframe-extras.min.js"></script>
+  </head>
+  <body>
+    <a-scene 
+      stats 
+      physics="debug:true"
+      sound="src: url(./audio/corneria.mp3); loop:true; autoplay:false; volume:0.5;"
+    >
+
+      <a-assets>
+        <a-asset-item 
+          id="spaceship" 
+          src="models/spaceship/scene.gltf"
+        >
+        </a-asset-item>
+      </a-assets>
+
+      <a-entity 
+        camera 
+        look-controls 
+        position="0 3 0"
+      >
+        <a-cursor></a-cursor>
+        <a-entity 
+          position="0 -4 1" 
+          id="weapon"
+          rotation="0 180 0" 
+        >
+          <a-entity 
+            id='spaceship-model' 
+            gltf-model="#spaceship"
+            static-body="shape:box;"
+          >
+          </a-entity>
+        </a-entity>
+      </a-entity>
+
+      <a-entity 
+        id='ball'
+        material="color:red;"
+        geometry="primitive:sphere; radius: 0.5;"
+        position="0 1 -10"
+        dynamic-body
+      >
+      </a-entity>
+
+      <!-- background sky -->
+      <a-sky color="#109BE4"></a-sky>
+
+      <a-plane 
+        color="#368D6B" 
+        rotation="-90 0 0" 
+        width="100" 
+        height="100" 
+        static-body
+      >
+      </a-plane>
+    </a-scene>
+  </body>
+</html>
