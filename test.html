@@ -7,29 +7,20 @@
     <script src="./dist/aframe-environment-component.min.js"></script>
     <script src="https://codechangers.com/physics.js"></script>
   </head>
+
   <body>
     <audio src="./audio/fireball.wav" id="fire"></audio>
     <audio src="./audio/kick.wav" id="explode"></audio>
+
     <a-scene
       environment="preset:corneria"
-      stats 
       sound="src: url(./audio/corneria.mp3); loop:true; autoplay:true; volume:1;"
     >
-
       <a-assets>
-        <a-asset-item 
-          id="spaceship" 
-          src="models/spaceship/scene.gltf"
-        >
+        <a-asset-item id="spaceship" src="models/spaceship/scene.gltf">
         </a-asset-item>
-      </a-assets>
-
-      <a-assets>
-        <a-asset-item 
-          id="enemy" 
-          src="models/enemy/scene.gltf"
-        >
-        </a-asset-item>
+        <a-asset-item id="enemy" src="models/enemy/scene.gltf"> </a-asset-item>
+        <img src="fox.gif" id="fox" />
       </a-assets>
 
       <a-camera
@@ -39,23 +30,38 @@
         look-controls
         restrict-position
       >
-        <a-text id="scoreboard" position="4 4 -5" value="Score: 0" text="color: orange; align: center; width: 7;font: https://cdn.aframe.io/fonts/mozillavr.fnt;"></a-text>
-        <a-text id="timer" position="0 4 -5" value="Timer: 30" text="color: white; align: center; width: 7;font: https://cdn.aframe.io/fonts/mozillavr.fnt;"></a-text>
+        <a-text
+          id="scoreboard"
+          position="4 4 -5"
+          value="Score: 0"
+          text="color: orange; align: center; width: 7;font: https://cdn.aframe.io/fonts/mozillavr.fnt;"
+        ></a-text>
+        <a-text
+          id="timer"
+          position="0 4 -5"
+          value="Timer: 60"
+          text="color: white; align: center; width: 7;font: https://cdn.aframe.io/fonts/mozillavr.fnt;"
+        ></a-text>
         <a-cursor intersection-spawn="event: click; mixin: voxel"></a-cursor>
 
-        <a-entity 
-          id='spaceship-model' 
+        <a-entity
+          id="spaceship-model"
           gltf-model="#spaceship"
           sound="src: url(./audio/fire.mp3); autoplay: false; loop: false; volume:0.5;"
-          position="0 -4 1" 
+          position="0 -4 1"
           rotation="0 180 0"
         >
         </a-entity>
-
+        <a-image
+          width="0.4"
+          height="0.4"
+          src="#fox"
+          position="-2.5 1.3 -2"
+        ></a-image>
       </a-camera>
 
-      <a-entity 
-        id='cube'
+      <a-entity
+        id="cube"
         class="target"
         material="shader: flat; color:red;"
         geometry="primitive:box; radius: 1;"
@@ -64,8 +70,8 @@
       >
       </a-entity>
 
-      <a-entity 
-        id='sphere'
+      <a-entity
+        id="sphere"
         class="target"
         material="shader: flat;color:white;"
         geometry="primitive:sphere; radius: 1;"
@@ -74,14 +80,14 @@
       >
       </a-entity>
 
-      <a-entity 
-        id='enemy-model' 
+      <a-entity
+        id="enemy-model"
         class="target"
         gltf-model="#spaceship"
         scale="0.5 0.5 0.5"
-        position="0 5 -30" 
+        position="0 5 -30"
         static-body
-        >
+      >
         <a-animation
           attribute="position"
           dur="3000"
@@ -96,136 +102,140 @@
       <!-- background sky -->
       <a-sky material="shader: flat; color:#109BE4"></a-sky>
 
-      <a-plane 
+      <a-plane
         id="floor"
         position="0 -0.1 0"
-        rotation="-90 0 0" 
-        width="1000" 
-        height="1000" 
+        rotation="-90 0 0"
+        width="1000"
+        height="1000"
         static-body
       >
       </a-plane>
     </a-scene>
   </body>
   <script>
-      let gamestate = {
-        score: 0,
-        timer: 30,
-        over: false,
+        let gamestate = {
+          score: 0,
+          timer: 60,
+          over: false,
+        };
+
+      var cameraEl = document.getElementById('myCamera')
+      var sceneEl = document.querySelector('a-scene');
+      var cubeEl = document.querySelector('#cube');
+      var sphereEl = document.querySelector('#sphere');
+      var arwingEl = document.querySelector('#enemy-model');
+      var scoreEl = document.getElementById('scoreboard');
+      var timerEl = document.getElementById('timer');
+      var shipEl = document.getElementById('spaceship-model');
+
+      // Timer
+      setInterval(() => {
+        if(gamestate.timer > 0) {
+          gamestate.timer = gamestate.timer - 1;
+          timerEl.setAttribute('value', 'Timer: ' + gamestate.timer);
+        }
+        if(gamestate.timer == 0 && gamestate.score >= 10) {
+          timerEl.setAttribute('text', "color: orange; align: center; width: 27;font: https://cdn.aframe.io/fonts/mozillavr.fnt;");
+          timerEl.setAttribute('value', 'You Won!!!');
+          sceneEl.setAttribute("sound", "src: url(./audio/win.mp3); loop:false; autoplay:true; volume:2;");
+          gamestate.over = true;
+        }
+        else if(gamestate.timer == 0 && gamestate.score <= 10) {
+          timerEl.setAttribute('text', "color: red; align: center; width: 27;font: https://cdn.aframe.io/fonts/mozillavr.fnt;")
+          timerEl.setAttribute('value', 'You Lost');
+          sceneEl.setAttribute("sound", "src: url(./audio/lost.mp3); loop:false; autoplay:true; volume:2;");
+          gamestate.over = true;
+        }
+      }, 1000);
+
+      // Cube bounce
+      cubeEl.addEventListener('collide', (e) => {
+        cubeEl.body.velocity.set(0, 10,0);
+      });
+
+
+      // Get the view directions
+      function getDirection(camera, speed) {
+        var y = camera.getAttribute('rotation').y + 90;
+        var x = camera.getAttribute('rotation').x;
+
+        var moveX = Math.cos(y / 360 * (Math.PI * 2));
+        var moveY = Math.sin(x / 360 * (Math.PI * 2));
+        var moveZ = Math.sin(y / 360 * (Math.PI * 2));
+        var moveXRatio = (Math.pow(moveX, 2)) / (Math.pow(moveX, 2) + Math.pow(moveZ, 2));
+        var moveZRatio = (Math.pow(moveZ, 2)) / (Math.pow(moveX, 2) + Math.pow(moveZ, 2));
+
+        if (moveX <= 0) {
+            moveX = -Math.sqrt((1 - Math.pow(moveY, 2)) * moveXRatio);
+        } else {
+            moveX = Math.sqrt((1 - Math.pow(moveY, 2)) * moveXRatio);
+        }
+
+        if (moveZ <= 0) {
+            moveZ = -Math.sqrt((1 - Math.pow(moveY, 2)) * moveZRatio);
+        } else {
+            moveZ = Math.sqrt((1 - Math.pow(moveY, 2)) * moveZRatio);
+        }
+
+        return { x: moveX * speed, y: moveY * speed, z: -moveZ * speed };
+    }
+
+      // Generate random positions
+    function randomPosition() {
+      return {
+        x: Math.random() * 20,
+        y: Math.random() * 20,
+        z: Math.random() * 20
       };
+    }
 
-    var cameraEl = document.getElementById('myCamera')
-    var sceneEl = document.querySelector('a-scene');
-    var cubeEl = document.querySelector('#cube');
-    var sphereEl = document.querySelector('#sphere');
-    var arwingEl = document.querySelector('#enemy-model');
-    var scoreEl = document.getElementById('scoreboard');
-    var timerEl = document.getElementById('timer');
-    var shipEl = document.getElementById('spaceship-model');
+      // Generate spheres
+    function createSphere(){
+      const clone = sphereEl.cloneNode()
+      clone.setAttribute("position", randomPosition());
+      clone.setAttribute("position", randomPosition());
+      sceneEl.appendChild(clone)
+    }
 
-    setInterval(() => {
-      if(gamestate.timer > 0) {
-        gamestate.timer = gamestate.timer - 1;
-        timerEl.setAttribute('value', 'Timer: ' + gamestate.timer);
-      }
-      if(gamestate.timer == 0 && gamestate.score >= 10) {
-        timerEl.setAttribute('text', "color: orange; align: center; width: 27;font: https://cdn.aframe.io/fonts/mozillavr.fnt;");
-        timerEl.setAttribute('value', 'You Won!!!');
-        sceneEl.setAttribute("sound", "src: url(./audio/win.mp3); loop:false; autoplay:true; volume:1;");
-        gamestate.over = true;
-      } 
-      else if(gamestate.timer == 0 && gamestate.score <= 10) {
-        timerEl.setAttribute('text', "color: red; align: center; width: 27;font: https://cdn.aframe.io/fonts/mozillavr.fnt;")
-        timerEl.setAttribute('value', 'You Lost');
-        sceneEl.setAttribute("sound", "src: url(./audio/lost.mp3); loop:false; autoplay:true; volume:1;");
-        gamestate.over = true;
-      }
-    }, 1000);
+      // generate laser beams
+    const shoot = () => {
+      const bullet = document.createElement("a-sphere");
+      let pos = cameraEl.getAttribute("position");
+      bullet.setAttribute("position", pos);
+      bullet.setAttribute("velocity", getDirection(cameraEl, 110));
+      bullet.setAttribute("dynamic-body", true);
+      bullet.setAttribute("radius", 0.1);
+      bullet.setAttribute("material", "shader: flat; color:red;");
+      sceneEl.appendChild(bullet);
 
-    cubeEl.addEventListener('collide', (e) => {
-      cubeEl.body.velocity.set(0, 10,0);
-    });
+      bullet.addEventListener('collide', (e) => {
+        if (e.detail.body.el.id === 'floor') {
+          sceneEl.removeChild(e.detail.target.el)
+        }
+        else if (e.detail.body.el.className === 'target') {
+          console.log()
+          document.getElementById('explode').play();
+          gamestate.score = gamestate.score + 1;
+          scoreEl.setAttribute('value', 'Score: ' + gamestate.score);
+          sceneEl.removeChild(e.detail.target.el)
+          sceneEl.removeChild(e.detail.body.el);
+          createSphere();
+        }
 
-    arwingEl.addEventListener('collide', (e) => {
-      arwingEl.body.velocity.set(0, 10,0);
-    });
-
-    function getDirection(camera, speed) {
-      var y = camera.getAttribute('rotation').y + 90;
-      var x = camera.getAttribute('rotation').x;
-  
-      var moveX = Math.cos(y / 360 * (Math.PI * 2));
-      var moveY = Math.sin(x / 360 * (Math.PI * 2));
-      var moveZ = Math.sin(y / 360 * (Math.PI * 2));
-      var moveXRatio = (Math.pow(moveX, 2)) / (Math.pow(moveX, 2) + Math.pow(moveZ, 2));
-      var moveZRatio = (Math.pow(moveZ, 2)) / (Math.pow(moveX, 2) + Math.pow(moveZ, 2));
-  
-      if (moveX <= 0) {
-          moveX = -Math.sqrt((1 - Math.pow(moveY, 2)) * moveXRatio);
-      } else {
-          moveX = Math.sqrt((1 - Math.pow(moveY, 2)) * moveXRatio);
-      }
-  
-      if (moveZ <= 0) {
-          moveZ = -Math.sqrt((1 - Math.pow(moveY, 2)) * moveZRatio);
-      } else {
-          moveZ = Math.sqrt((1 - Math.pow(moveY, 2)) * moveZRatio);
-      }
-  
-      return { x: moveX * speed, y: moveY * speed, z: -moveZ * speed };
-  }
-
-  function randomPosition() {
-    return {
-      x: Math.random() * 20,
-      y: Math.random() * 20,
-      z: Math.random() * 20
+        if(e.detail.body.el.id === 'cube') {
+          gamestate.score = gamestate.score + 1;
+          scoreEl.setAttribute('value', 'Score: ' + gamestate.score);
+        }
+      })
     };
-  }
 
-  function createSphere(){
-    const clone = sphereEl.cloneNode()
-    clone.setAttribute("position", randomPosition());
-    clone.setAttribute("position", randomPosition());
-    sceneEl.appendChild(clone)
-  }
-
-  const shoot = () => {
-    const bullet = document.createElement("a-sphere");
-    let pos = cameraEl.getAttribute("position");
-    bullet.setAttribute("position", pos);
-    bullet.setAttribute("velocity", getDirection(cameraEl, 110));
-    bullet.setAttribute("dynamic-body", true);
-    bullet.setAttribute("radius", 0.1);
-    bullet.setAttribute("material", "shader: flat; color:red;");
-    sceneEl.appendChild(bullet);
-
-    bullet.addEventListener('collide', (e) => {
-      if (e.detail.body.el.id === 'floor') {
-        sceneEl.removeChild(e.detail.target.el)
-      } 
-      else if (e.detail.body.el.className === 'target') {
-        console.log()
-        document.getElementById('explode').play();
-        gamestate.score = gamestate.score + 1;
-        scoreEl.setAttribute('value', 'Score: ' + gamestate.score);
-        sceneEl.removeChild(e.detail.target.el)
-        sceneEl.removeChild(e.detail.body.el);
-        createSphere();
-      }
-
-      if(e.detail.body.el.id === 'cube') {
-        gamestate.score = gamestate.score + 1;
-        scoreEl.setAttribute('value', 'Score: ' + gamestate.score);
-      }
-    })
-  };
-
-    sceneEl.addEventListener('click', function() {
-      if(!gamestate.over) {
-        shoot();
-        document.getElementById('fire').play();
-      }
-    });
+      // Shoot sound
+      sceneEl.addEventListener('click', function() {
+        if(!gamestate.over) {
+          shoot();
+          document.getElementById('fire').play();
+        }
+      });
   </script>
 </html>

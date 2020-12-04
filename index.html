@@ -4,21 +4,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.7.1/aframe.min.js"></script>
     <!-- physics and other extras -->
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.13.1/dist/aframe-extras.min.js"></script>
+    <!-- environment  -->
     <script src="./dist/aframe-environment-component.min.js"></script>
   </head>
   <body>
     <audio src="./audio/goodluck.mp3" id="start"></audio>
     <a-scene
       environment="preset:goaland"
-      stats 
       sound="src: url(./audio/controls.mp3); loop:true; autoplay:true; volume:2;"
     >
-
       <a-assets>
-        <a-asset-item 
-          id="spaceship" 
-          src="models/spaceship/scene.gltf"
-        >
+        <a-asset-item id="spaceship" src="models/spaceship/scene.gltf">
         </a-asset-item>
       </a-assets>
 
@@ -29,7 +25,12 @@
         look-controls
         restrict-position
       >
-        <a-text id="scoreboard" position="0 4 -5" value="Press To Start" text="color: white; align: center; width: 25;font: https://cdn.aframe.io/fonts/mozillavr.fnt;">
+        <a-text
+          id="scoreboard"
+          position="0 4 -5"
+          value="Press To Start"
+          text="color: white; align: center; width: 25;font: https://cdn.aframe.io/fonts/mozillavr.fnt;"
+        >
           <a-animation
             attribute="scale"
             dur="2000"
@@ -40,16 +41,15 @@
           </a-animation>
         </a-text>
         <a-cursor intersection-spawn="event: click; mixin: voxel"></a-cursor>
-        </a-entity>
       </a-camera>
 
-      <a-entity 
-        id='enemy-model' 
+      <a-entity
+        id="enemy-model"
         class="target"
         gltf-model="#spaceship"
         scale="0.5 0.5 0.5"
-        position="0 3 -10" 
-        >
+        position="0 3 -10"
+      >
         <a-animation
           attribute="rotation"
           dur="5000"
@@ -62,12 +62,12 @@
     </a-scene>
   </body>
   <script>
-    var sceneEl = document.querySelector('a-scene');
-    sceneEl.addEventListener('click', () => {
-      document.getElementById('start').play();
-      setTimeout(() => {
-        location.href = "test.html"
-      },2000)
-    })
+    var sceneEl = document.querySelector("a-scene");
+    sceneEl.addEventListener("click", () => {
+      document.getElementById("start").play();
+      setTimeout(() => {
+        location.href = "test.html";
+      }, 1500);
+    });
   </script>
 </html>
